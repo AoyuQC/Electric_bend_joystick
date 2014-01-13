@@ -77,6 +77,9 @@ void Nunchuck_Initialization()
   printf(" initial succeed !\n");
   //initial first read action
   DMA_sig = 1;
+  
+  //initial PB13
+  GPIO_ResetBits(GPIOB, GPIO_Pin_13);
 }  
 
 

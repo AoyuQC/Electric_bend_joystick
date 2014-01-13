@@ -957,12 +957,15 @@ void DMA1_Channel6_IRQHandler(void)
   if (DMA_GetFlagStatus(DMA1_IT_TC6) != RESET)
   {
     DMA_Cmd(DMA1_Channel6, DISABLE);
-    DMA1_Channel6->CNDTR = 2;
+    DMA1_Channel6->CNDTR = 3;
     DMA_ClearFlag(DMA1_IT_TC6);
     switch (mode)
     {
       case 1:
+        GPIO_SetBits(GPIOB, GPIO_Pin_13);
+        //while(I2C_GetFlagStatus(I2C1, I2C_FLAG_BTF) == SET);
         I2C_GenerateSTART(I2C1, ENABLE);
+        GPIO_ResetBits(GPIOB, GPIO_Pin_13);
         mode = 2;
         break;
       case 2:
