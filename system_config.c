@@ -20,6 +20,7 @@
 uint8_t mode = 0;
 uint8_t Direction = Transmitter;
 extern uint8_t DMA_sig;
+extern uint8_t I2C1_Buffer_Tx[];
 volatile FIFO_TypeDef NunchuckRx;
 /* Private function prototypes -----------------------------------------------*/
 /* Private functions ---------------------------------------------------------*/
@@ -64,7 +65,7 @@ void Nunchuck_Initialization()
   //}
   
   /* Enable I2C1 event and buffer interrupts */
-  I2C_ITConfig(I2C1, I2C_IT_EVT | I2C_IT_BUF, ENABLE);
+  //I2C_ITConfig(I2C1, I2C_IT_EVT | I2C_IT_BUF, ENABLE);
   //initial nunchuck function
   mode = 1;
   Direction = Transmitter;
@@ -72,7 +73,30 @@ void Nunchuck_Initialization()
   I2C_SoftwareResetCmd(I2C1, DISABLE);
  
   I2C_GenerateSTART(I2C1, ENABLE);
-  while (mode != 3)
+  /* Test on I2C1 EV5 and clear it */
+  while(!I2C_CheckEvent(I2C1, I2C_EVENT_MASTER_MODE_SELECT)); 
+  /* Send I2C2 slave Address for write */
+  I2C_Send7bitAddress(I2C1, 0xA4, I2C_Direction_Transmitter); 
+  /* Test on I2C1 EV6 and clear it */
+  while(!I2C_CheckEvent(I2C1, I2C_EVENT_MASTER_TRANSMITTER_MODE_SELECTED));  
+  
+  I2C1_Buffer_Tx[0] = 0xF0;
+  I2C1_Buffer_Tx[1] = 0x55;
+  
+  /* Enable I2C1 DMA */
+  I2C_DMACmd(I2C1, ENABLE);
+
+  /* Enable DMA1 Channel6 */
+  DMA_Cmd(DMA1_Channel6, ENABLE);
+  
+  /* DMA1 Channel6 transfer complete test */
+  while(!DMA_GetFlagStatus(DMA1_FLAG_TC6));
+  
+  GPIO_SetBits(GPIOB, GPIO_Pin_13);
+  /* Send I2C1 STOP Condition */
+  I2C_GenerateSTART(I2C1, ENABLE);
+  
+  while (mode != 2)
   {}
   printf(" initial succeed !\n");
   //initial first read action

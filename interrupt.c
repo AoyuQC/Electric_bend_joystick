@@ -690,7 +690,7 @@ void I2C1_EV_IRQHandler(void)
         I2C_Send7bitAddress(I2C1, 0xA4, I2C_Direction_Receiver);
       }
       
-      I2C_ITConfig(I2C1, I2C_IT_BUF, ENABLE);
+      //I2C_ITConfig(I2C1, I2C_IT_BUF, ENABLE);
       
       #ifdef I2C_SM_DEBUG
       sm_count[num] = 1;
@@ -956,8 +956,9 @@ void DMA1_Channel6_IRQHandler(void)
 {
   if (DMA_GetFlagStatus(DMA1_IT_TC6) != RESET)
   {
+    //GPIO_SetBits(GPIOB, GPIO_Pin_13);
     DMA_Cmd(DMA1_Channel6, DISABLE);
-    DMA1_Channel6->CNDTR = 3;
+    DMA1_Channel6->CNDTR = 2;
     DMA_ClearFlag(DMA1_IT_TC6);
     switch (mode)
     {
