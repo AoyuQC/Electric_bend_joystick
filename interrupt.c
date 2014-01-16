@@ -954,16 +954,17 @@ void DMA1_Channel7_IRQHandler(void)
 
 void DMA1_Channel6_IRQHandler(void)
 {
+  GPIOB->ODR ^= 0x2000;
   if (DMA_GetFlagStatus(DMA1_IT_TC6) != RESET)
   {
-    //GPIO_SetBits(GPIOB, GPIO_Pin_13);
+    GPIO_SetBits(GPIOB, GPIO_Pin_13);
     DMA_Cmd(DMA1_Channel6, DISABLE);
     DMA1_Channel6->CNDTR = 2;
     DMA_ClearFlag(DMA1_IT_TC6);
     switch (mode)
     {
       case 1:
-        GPIO_SetBits(GPIOB, GPIO_Pin_13);
+        GPIOB->ODR ^= 0x2000;
         //while(I2C_GetFlagStatus(I2C1, I2C_FLAG_BTF) == SET);
         I2C_GenerateSTART(I2C1, ENABLE);
         GPIO_ResetBits(GPIOB, GPIO_Pin_13);
@@ -1026,6 +1027,7 @@ void DMA1_Channel6_IRQHandler(void)
       over_pos = 88;
     }
     #endif
+    GPIOB->ODR ^= 0x2000;
   }
 }
   

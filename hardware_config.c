@@ -20,7 +20,7 @@
 /* Private macro -------------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
 uint8_t I2C1_Buffer_Rx[BufferSize] = {0,0,0,0,0,0};
-uint8_t I2C1_Buffer_Tx[2];
+uint8_t I2C1_Buffer_Tx[12];
 __IO uint16_t ADCConvertedValue;    
 DMA_InitTypeDef DMA_InitStructure;
 /* Private function prototypes -----------------------------------------------*/
@@ -359,7 +359,7 @@ void DMA_Configuration()
   DMA_InitStructure.DMA_PeripheralBaseAddr = (uint32_t)I2C1_DR_Address;
   DMA_InitStructure.DMA_MemoryBaseAddr = (uint32_t)I2C1_Buffer_Tx;
   DMA_InitStructure.DMA_DIR = DMA_DIR_PeripheralDST;
-  DMA_InitStructure.DMA_BufferSize = 2;
+  DMA_InitStructure.DMA_BufferSize = 5;
   DMA_InitStructure.DMA_PeripheralInc = DMA_PeripheralInc_Disable;
   DMA_InitStructure.DMA_MemoryInc = DMA_MemoryInc_Enable;
   DMA_InitStructure.DMA_PeripheralDataSize = DMA_MemoryDataSize_Byte;
@@ -368,7 +368,7 @@ void DMA_Configuration()
   DMA_InitStructure.DMA_Priority = DMA_Priority_VeryHigh;
   DMA_InitStructure.DMA_M2M = DMA_M2M_Disable;
   DMA_Init(DMA1_Channel6, &DMA_InitStructure);
-  //DMA_ITConfig(DMA1_Channel6, DMA_IT_TC, ENABLE); 
+  DMA_ITConfig(DMA1_Channel6, DMA_IT_TC | DMA_IT_HT, ENABLE); 
  
   DMA_Cmd(DMA1_Channel7, DISABLE);
   DMA_Cmd(DMA1_Channel6, DISABLE);
