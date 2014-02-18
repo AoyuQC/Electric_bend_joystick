@@ -14,12 +14,15 @@
 /* Private define ------------------------------------------------------------*/
 #define ADC1_DR_Address    ((uint32_t)0x4001244C)
 #define I2C1_DR_Address    ((uint32_t)0x40005410)
+#define I2C2_DR_Address        0x40005810
 #define I2C1_SLAVE_ADDRESS7    0x30
+#define I2C2_SLAVE_ADDRESS7    0x31
 #define BufferSize             6
 #define ClockSpeed             100000 //20khz
 /* Private macro -------------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
 uint8_t I2C1_Buffer_Rx[BufferSize] = {0,0,0,0,0,0};
+uint8_t I2C2_Buffer_Rx[BufferSize];
 uint8_t I2C1_Buffer_Tx[12];
 __IO uint16_t ADCConvertedValue;    
 DMA_InitTypeDef DMA_InitStructure;
@@ -137,6 +140,8 @@ void RCC_Configuration()
   //APB1 Config
   //enable I2C1 clock
   RCC->APB1ENR |= 0x00200000; //I2C1EN(21):1
+  //enable I2C2 clock
+  RCC->APB1ENR |= 0x0040000; //I2C2EN(22): 1
   //enable TIM2 clock
   /*RCC->APB1ENR |= 0x00000001;//TIM2(0):1
   //enable TIM3 clock
@@ -208,12 +213,20 @@ void GPIO_Configuration()
   GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
   GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_OD;
   GPIO_Init(GPIOB, &GPIO_InitStructure);
+  
+  GPIO_InitStructure.GPIO_Pin =  GPIO_Pin_10 | GPIO_Pin_11;
+  GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_OD;
+  GPIO_Init(GPIOB, &GPIO_InitStructure);
+  GPIO_SetBits(GPIOB, GPIO_Pin_11);
 
   //PB13
   GPIO_InitStructure.GPIO_Pin = GPIO_Pin_13;
   GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
   GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
   GPIO_Init(GPIOB, &GPIO_InitStructure); 
+  
+  GPIO_SetBits(GPIOB, GPIO_Pin_13);
 }
 
 //Config NVIC
@@ -235,7 +248,7 @@ void NVIC_Configuration()
   NVIC_Init(&NVIC_InitStructure);*/
 
   /* Configure and enable I2C1 event interrupt -------------------------------*/
-  NVIC_InitStructure.NVIC_IRQChannel = I2C1_EV_IRQn;
+  /*NVIC_InitStructure.NVIC_IRQChannel = I2C1_EV_IRQn;
   NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
   NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
   NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
@@ -251,7 +264,7 @@ void NVIC_Configuration()
   NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
   NVIC_InitStructure.NVIC_IRQChannelSubPriority = 2;
   NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
-  NVIC_Init(&NVIC_InitStructure);    
+  NVIC_Init(&NVIC_InitStructure);*/    
   
   NVIC_InitStructure.NVIC_IRQChannel = USART1_IRQn;
   NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
@@ -359,7 +372,7 @@ void DMA_Configuration()
   DMA_InitStructure.DMA_PeripheralBaseAddr = (uint32_t)I2C1_DR_Address;
   DMA_InitStructure.DMA_MemoryBaseAddr = (uint32_t)I2C1_Buffer_Tx;
   DMA_InitStructure.DMA_DIR = DMA_DIR_PeripheralDST;
-  DMA_InitStructure.DMA_BufferSize = 5;
+  DMA_InitStructure.DMA_BufferSize = 7;
   DMA_InitStructure.DMA_PeripheralInc = DMA_PeripheralInc_Disable;
   DMA_InitStructure.DMA_MemoryInc = DMA_MemoryInc_Enable;
   DMA_InitStructure.DMA_PeripheralDataSize = DMA_MemoryDataSize_Byte;
@@ -368,8 +381,24 @@ void DMA_Configuration()
   DMA_InitStructure.DMA_Priority = DMA_Priority_VeryHigh;
   DMA_InitStructure.DMA_M2M = DMA_M2M_Disable;
   DMA_Init(DMA1_Channel6, &DMA_InitStructure);
-  DMA_ITConfig(DMA1_Channel6, DMA_IT_TC | DMA_IT_HT, ENABLE); 
- 
+  DMA_ITConfig(DMA1_Channel6, DMA_IT_TC | DMA_IT_HT, DISABLE); 
+  
+    /* DMA1 channel5 configuration ----------------------------------------------*/
+  DMA_DeInit(DMA1_Channel5);
+  DMA_InitStructure.DMA_PeripheralBaseAddr = (uint32_t)I2C2_DR_Address;
+  DMA_InitStructure.DMA_MemoryBaseAddr = (uint32_t)I2C2_Buffer_Rx;
+  DMA_InitStructure.DMA_DIR = DMA_DIR_PeripheralSRC;
+  DMA_InitStructure.DMA_BufferSize = BufferSize;
+  DMA_InitStructure.DMA_PeripheralInc = DMA_PeripheralInc_Disable;
+  DMA_InitStructure.DMA_MemoryInc = DMA_MemoryInc_Enable;
+  DMA_InitStructure.DMA_PeripheralDataSize = DMA_MemoryDataSize_Byte;
+  DMA_InitStructure.DMA_MemoryDataSize = DMA_MemoryDataSize_Byte;
+  DMA_InitStructure.DMA_Mode = DMA_Mode_Normal;
+  DMA_InitStructure.DMA_Priority = DMA_Priority_VeryHigh;
+  DMA_InitStructure.DMA_M2M = DMA_M2M_Disable;
+  DMA_Init(DMA1_Channel5, &DMA_InitStructure);
+  
+  DMA_Cmd(DMA1_Channel5, DISABLE);
   DMA_Cmd(DMA1_Channel7, DISABLE);
   DMA_Cmd(DMA1_Channel6, DISABLE);
 }
@@ -378,10 +407,10 @@ void DMA_Configuration()
 void I2C_Configuration()
 {
   //check whether bus is busy or not
-  while (I2C_GetFlagStatus(I2C1, I2C_FLAG_BUSY))
+  /*while (I2C_GetFlagStatus(I2C1, I2C_FLAG_BUSY))
   {
     I2C_SoftwareResetCmd(I2C1, ENABLE);
-  }
+  }*/
   
   I2C_InitTypeDef   I2C_InitStructure;
   //I2C1 configuration
@@ -392,8 +421,12 @@ void I2C_Configuration()
   I2C_InitStructure.I2C_AcknowledgedAddress = I2C_AcknowledgedAddress_7bit;
   I2C_InitStructure.I2C_ClockSpeed = ClockSpeed;
   I2C_Init(I2C1, &I2C_InitStructure); 
+  //GPIO_SetBits(GPIOB, GPIO_Pin_13);
+  I2C_InitStructure.I2C_OwnAddress1 = I2C2_SLAVE_ADDRESS7;
+  I2C_Init(I2C2, &I2C_InitStructure);
   
   I2C_Cmd(I2C1, ENABLE);
+  I2C_Cmd(I2C2, ENABLE);
   /* Enable I2C1 event and buffer interrupts */
   I2C_ITConfig(I2C1, I2C_IT_EVT | I2C_IT_BUF, DISABLE);
 }  

@@ -70,13 +70,16 @@ void Nunchuck_Initialization()
   mode = 1;
   Direction = Transmitter;
   
-  I2C_SoftwareResetCmd(I2C1, DISABLE);
+  GPIO_ResetBits(GPIOB, GPIO_Pin_13);
+  
+  //I2C_SoftwareResetCmd(I2C1, DISABLE);
  
   I2C_GenerateSTART(I2C1, ENABLE);
   /* Test on I2C1 EV5 and clear it */
   while(!I2C_CheckEvent(I2C1, I2C_EVENT_MASTER_MODE_SELECT)); 
   /* Send I2C2 slave Address for write */
-  I2C_Send7bitAddress(I2C1, 0xA4, I2C_Direction_Transmitter); 
+  //I2C_Send7bitAddress(I2C1, 0xA4, I2C_Direction_Transmitter); 
+  I2C_Send7bitAddress(I2C1, 0x31, I2C_Direction_Transmitter); 
   /* Test on I2C1 EV6 and clear it */
   while(!I2C_CheckEvent(I2C1, I2C_EVENT_MASTER_TRANSMITTER_MODE_SELECTED));  
   
@@ -94,15 +97,19 @@ void Nunchuck_Initialization()
   I2C1_Buffer_Tx[11] = 0x0A;  
   
   /* Enable I2C1 DMA */
-  I2C_DMACmd(I2C1, ENABLE);
+  I2C_DMACmd(I2C1, ENABLE);  
+  /* Enable I2C2 DMA */
+  I2C_DMACmd(I2C2, ENABLE);
 
+  /* Enable DMA1 Channel5 */
+  DMA_Cmd(DMA1_Channel5, ENABLE);
   /* Enable DMA1 Channel6 */
   DMA_Cmd(DMA1_Channel6, ENABLE);
   
   /* DMA1 Channel6 transfer complete test */
-  //while(!DMA_GetFlagStatus(DMA1_FLAG_TC6));
+  while(!DMA_GetFlagStatus(DMA1_FLAG_TC6));
   
-  //GPIO_SetBits(GPIOB, GPIO_Pin_13);
+  GPIO_SetBits(GPIOB, GPIO_Pin_13);
   /* Send I2C1 STOP Condition */
   //I2C_GenerateSTART(I2C1, ENABLE);
   
@@ -113,7 +120,7 @@ void Nunchuck_Initialization()
   DMA_sig = 1;
   
   //initial PB13
-  GPIO_ResetBits(GPIOB, GPIO_Pin_13);
+  //GPIO_ResetBits(GPIOB, GPIO_Pin_13);
 }  
 
 
