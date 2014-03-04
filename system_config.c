@@ -83,6 +83,7 @@ void Nunchuck_Initialization()
   /* Test on I2C2 EV1 and clear it */
   while(!I2C_CheckEvent(I2C2, I2C_EVENT_SLAVE_RECEIVER_ADDRESS_MATCHED));  
   /* Test on I2C1 EV6 and clear it */
+  //while(!I2C_CheckEvent(I2C1, I2C_EVENT_MASTER_TRANSMITTER_MODE_SELECTED));
   while(!I2C_CheckEvent(I2C1, I2C_EVENT_MASTER_TRANSMITTER_MODE_SELECTED));
   
   /*printf(" start DMA !\n");  
