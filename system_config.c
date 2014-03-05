@@ -112,7 +112,8 @@ void Nunchuck_Initialization()
   DMA_Cmd(DMA1_Channel6, ENABLE);
   
   /* DMA1 Channel6 transfer complete test */
-  while(!DMA_GetFlagStatus(DMA1_FLAG_TC6));
+  //while(!DMA_GetFlagStatus(DMA1_FLAG_TC6));
+  while(!DMA_GetFlagStatus(DMA1_FLAG_TC5));
   
   GPIO_SetBits(GPIOB, GPIO_Pin_13);
   /* Send I2C1 STOP Condition */
