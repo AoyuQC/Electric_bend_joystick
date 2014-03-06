@@ -3,10 +3,11 @@
  *
 user header files of joystick project
  */
+//#define INTR_ENABLE
 //#define I2C_DMA_ISR
 //#define I2C_ISR
-#define I2C_DMA
-#define I2C_SM_DEBUG
+//#define I2C_DMA
+//#define I2C_SM_DEBUG
 //#define I2C_DATA_DEBUG
 //#define I2C_DMA_EXPERIMENT 
 

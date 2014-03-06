@@ -966,6 +966,7 @@ void DMA1_Channel6_IRQHandler(void)
       case 1:
         //GPIOB->ODR ^= 0x2000;
         //while(I2C_GetFlagStatus(I2C1, I2C_FLAG_BTF) == SET);
+        delay(50);
         I2C_GenerateSTART(I2C1, ENABLE);
         //GPIO_ResetBits(GPIOB, GPIO_Pin_13);
         mode = 2;
@@ -1031,8 +1032,6 @@ void DMA1_Channel6_IRQHandler(void)
   }
 }
 #endif 
-
-
 
 
 /**

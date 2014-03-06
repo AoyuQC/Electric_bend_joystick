@@ -18,7 +18,7 @@
 #define I2C1_SLAVE_ADDRESS7    0x30
 #define I2C2_SLAVE_ADDRESS7    0x31
 #define BufferSize             6
-#define ClockSpeed             100000 //20khz
+#define ClockSpeed             1000 //20khz
 /* Private macro -------------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
 uint8_t I2C1_Buffer_Rx[BufferSize] = {0,0,0,0,0,0};
@@ -264,7 +264,7 @@ void NVIC_Configuration()
   NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
   NVIC_InitStructure.NVIC_IRQChannelSubPriority = 2;
   NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
-  NVIC_Init(&NVIC_InitStructure);*/    
+  NVIC_Init(&NVIC_InitStructure);*/
   
   NVIC_InitStructure.NVIC_IRQChannel = USART1_IRQn;
   NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
@@ -381,7 +381,7 @@ void DMA_Configuration()
   DMA_InitStructure.DMA_Priority = DMA_Priority_High;
   DMA_InitStructure.DMA_M2M = DMA_M2M_Disable;
   DMA_Init(DMA1_Channel6, &DMA_InitStructure);
-  DMA_ITConfig(DMA1_Channel6, DMA_IT_TC | DMA_IT_HT, DISABLE); 
+  DMA_ITConfig(DMA1_Channel6, DMA_IT_TC, DISABLE); 
   
     /* DMA1 channel5 configuration ----------------------------------------------*/
   DMA_DeInit(DMA1_Channel5);
